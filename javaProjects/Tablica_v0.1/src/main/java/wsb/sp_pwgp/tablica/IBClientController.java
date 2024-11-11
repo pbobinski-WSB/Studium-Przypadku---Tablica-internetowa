@@ -13,16 +13,16 @@ import java.util.StringTokenizer;
  */
 public class IBClientController implements Runnable {
     private Socket socket = null;
-    
     private BufferedReader input;
     private PrintWriter output;
-    
     private IBClientView view = null;
-    
+
+    private int colorIndex;  // Przechowuje domyślny kolor użytkownika
+
     public IBClientController(String host, String port) throws Exception {
-    	IBClientModel model = new IBClientModel(this);
-    	view = new IBClientView(this, model, host + ":" + port);
-    	try {
+        IBClientModel model = new IBClientModel(this);
+        view = new IBClientView(this, model, host + ":" + port);
+        try {
             socket = new Socket(host, Integer.parseInt(port));
         } catch (UnknownHostException e) {
             throw new Exception("Unknown host.");
@@ -32,25 +32,24 @@ public class IBClientController implements Runnable {
             throw new Exception("Port value must be a number.");
         }
         try {
-            input = new BufferedReader(new InputStreamReader(
-            		socket.getInputStream()));
+            input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             output = new PrintWriter(socket.getOutputStream(), true);
         } catch (IOException ex) {
-            throw new Exception("Can not get input/output connection stream.");
+            throw new Exception("Cannot get input/output connection stream.");
         }
         new Thread(this).start();
     }
 
     boolean isDisconnected() {
-    	return socket == null;
+        return socket == null;
     }
 
     @Override
     public void run() {
-    	send(IBProtocol.LOGIN);
-    	while (true) {
+        send(IBProtocol.LOGIN);
+        while (true) {
             try {
-                String protocolSentence = receive(); 
+                String protocolSentence = receive();
                 if (!handleCommand(protocolSentence)) {
                     output.close();
                     input.close();
@@ -59,38 +58,43 @@ public class IBClientController implements Runnable {
                 }
             } catch (IOException ignore) {
             }
-    	}
-    	output = null;
+        }
+        output = null;
         input = null;
         socket = null;
-    	view.dispose();
+        view.dispose();
     }
 
     private boolean handleCommand(String protocolSentence) {
         StringTokenizer st = new StringTokenizer(protocolSentence);
         String command = st.nextToken();
         switch (command) {
-        case IBProtocol.LOGGEDIN:
-        	int id = Integer.parseInt(st.nextToken());
-            int colorIndex = Integer.parseInt(st.nextToken());
-            int width = Integer.parseInt(st.nextToken());
-            int height = Integer.parseInt(st.nextToken());
-            view.createView(colorIndex, width, height);
-            view.updateTitle(id + "");
-            break;
-        case IBProtocol.DRAW:
-        	view.drawLine(Integer.parseInt(st.nextToken()),
-        			Integer.parseInt(st.nextToken()), 
-        			Integer.parseInt(st.nextToken()), 
-        			Integer.parseInt(st.nextToken()),
-        			Integer.parseInt(st.nextToken()));
-        	break;
-        case IBProtocol.STOP:
-        	send(IBProtocol.STOPPED); // no break! - false must be returned
-        case IBProtocol.LOGGEDOUT:
-        	return false;// stop the communication
+            case IBProtocol.LOGGEDIN:
+                int id = Integer.parseInt(st.nextToken());
+                colorIndex = Integer.parseInt(st.nextToken()); // Inicjalizacja colorIndex po zalogowaniu
+                int width = Integer.parseInt(st.nextToken());
+                int height = Integer.parseInt(st.nextToken());
+                view.createView(colorIndex, width, height);
+                view.updateTitle(id + "");
+                break;
+            case IBProtocol.DRAW:
+                view.drawLine(Integer.parseInt(st.nextToken()),
+                        Integer.parseInt(st.nextToken()),
+                        Integer.parseInt(st.nextToken()),
+                        Integer.parseInt(st.nextToken()),
+                        Integer.parseInt(st.nextToken()));
+                break;
+            case IBProtocol.STOP:
+                send(IBProtocol.STOPPED); // no break! - false must be returned
+            case IBProtocol.LOGGEDOUT:
+                return false; // Stop the communication
         }
         return true;
+    }
+
+    // Metoda zwracająca indeks koloru; -1 jako specjalny kod dla gumki
+    private int getColorIndex() {
+        return view.getModel().isEraserActive() ? -1 : colorIndex;  // -1 to specjalny kod koloru dla gumki
     }
 
     void mousePressed(int x, int y) {
@@ -98,25 +102,25 @@ public class IBClientController implements Runnable {
     }
 
     void mouseDragged(int x, int y) {
-        send(IBProtocol.MOUSEDRAGGED + " " + x + " " + y);
+        send(IBProtocol.MOUSEDRAGGED + " " + getColorIndex() + " " + x + " " + y);
     }
 
     void mouseReleased(int x, int y) {
-        send(IBProtocol.MOUSERELEASED + " " + x + " " + y);
+        send(IBProtocol.MOUSERELEASED + " " + getColorIndex() + " " + x + " " + y);
     }
 
     void send(String command) {
         if (output != null)
             output.println(command);
     }
-    
+
     String receive() throws IOException {
-    	return input.readLine();
+        return input.readLine();
     }
 
     void forceLogout() {
-		if (socket != null) {
-			send(IBProtocol.LOGOUT);
-		}
+        if (socket != null) {
+            send(IBProtocol.LOGOUT);
+        }
     }
 }
