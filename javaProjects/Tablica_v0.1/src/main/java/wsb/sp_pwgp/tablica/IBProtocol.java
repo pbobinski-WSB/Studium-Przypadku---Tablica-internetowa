@@ -28,6 +28,9 @@ public class IBProtocol {
 
     static final String NULLCOMMAND = "nullcommand";
 
+    // Specjalny kolor dla gumki
+    public static final int ERASER_COLOR = -1;
+
     static final Color colors[] = { Color.black, Color.blue, Color.cyan,
             Color.green, Color.magenta, Color.orange, Color.pink, Color.red,
             Color.yellow };
