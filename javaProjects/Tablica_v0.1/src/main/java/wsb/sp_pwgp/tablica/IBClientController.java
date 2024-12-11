@@ -86,9 +86,9 @@ public class IBClientController implements Runnable {
         			Integer.parseInt(st.nextToken()));
         	break;
         case IBProtocol.STOP:
-        	send(IBProtocol.STOPPED); // no break! - false must be returned
+        	send(IBProtocol.STOPPED);
         case IBProtocol.LOGGEDOUT:
-        	return false;// stop the communication
+        	return false;
         }
         return true;
     }
