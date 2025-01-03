@@ -7,3 +7,4 @@
 5. Tomasz Gryboś (gitHub TomaszGrybos)
 6. Hubert Peciak
 7. Maria Gosa
+8. Dawid Klimczuk
