@@ -8,12 +8,14 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
+import java.awt.Point;
+import java.awt.geom.AffineTransform;
+import java.awt.Graphics2D;
 
 /**
- * @author kmi
+ * @autor kmi
  */
 @SuppressWarnings("serial")
-
 class IBClientModel extends Canvas implements MouseMotionListener, MouseListener {
 
     private IBClientController controller = null;
@@ -34,8 +36,35 @@ class IBClientModel extends Canvas implements MouseMotionListener, MouseListener
     private boolean isPreviewActive = false;
 
     private boolean isEraserActive = false;  // flaga trybu gumki
+    private int offsetX = 0;
+    private int offsetY = 0;
 
+    // Rozmiar pojedynczego kafelka (tile)
+    private static final int TILE_SIZE = 512;
+    // Ilość kafelków w widocznym obszarze
+    private static final int VISIBLE_TILES = 3;
 
+    // Bufor dla kafelków renderowanych dynamicznie
+    private BufferedImage[][] tileBuffer;
+
+    // Inicjalizacja kafelków
+    private void initializeTiles(int canvasWidth, int canvasHeight) {
+        int tileCols = (canvasWidth / TILE_SIZE) + 2;  // Dodanie zapasu kafelków
+        int tileRows = (canvasHeight / TILE_SIZE) + 2;
+
+        tileBuffer = new BufferedImage[tileCols][tileRows];
+
+        for (int col = 0; col < tileCols; col++) {
+            for (int row = 0; row < tileRows; row++) {
+                tileBuffer[col][row] = new BufferedImage(
+                        TILE_SIZE, TILE_SIZE, BufferedImage.TYPE_INT_RGB
+                );
+            }
+        }
+    }
+
+    private boolean isPanning = false;
+    private Point lastPanPoint;
 
     IBClientModel(IBClientController controller) {
         this.controller = controller;
@@ -46,17 +75,19 @@ class IBClientModel extends Canvas implements MouseMotionListener, MouseListener
         setSize(width, height);
         addMouseListener(this);
         addMouseMotionListener(this);
+        initializeTiles(width, height);  // Inicjalizacja kafelków
     }
+
     public void setDrawingShape(String shape) {
         this.drawingShape = shape;
         this.freeDrawing = false;
         drawingActive = false;
     }
 
-
     public void setColor(Color newColor) {
         this.color = newColor;
     }
+
     public void setPenThickness(int thickness) {
         this.penThickness = thickness;
     }
@@ -87,7 +118,6 @@ class IBClientModel extends Canvas implements MouseMotionListener, MouseListener
     public void toggleEraser() {
         isEraserActive = !isEraserActive;
     }
-
 
     synchronized void drawLine(Color c, int x1, int y1, int x2, int y2) {
         EventQueue.invokeLater(() -> {
@@ -130,20 +160,22 @@ class IBClientModel extends Canvas implements MouseMotionListener, MouseListener
 
     @Override
     public void mouseDragged(MouseEvent me) {
-
+        if (isPanning) {
+            updatePan(me.getPoint());
+            return;
+        }
         if (freeDrawing) {
             int tempX = mouseCurrentX;
             int tempY = mouseCurrentY;
-            mouseCurrentX = me.getX();
-            mouseCurrentY = me.getY();
+            mouseCurrentX = me.getX() - offsetX;  // Dostosowanie do przesunięcia
+            mouseCurrentY = me.getY() - offsetY;
             drawLine(color, tempX, tempY, mouseCurrentX, mouseCurrentY);
             controller.mouseDragged(mouseCurrentX, mouseCurrentY);
         } else if (isPreviewActive) {
-            previewX = me.getX();
-            previewY = me.getY();
+            previewX = me.getX() - offsetX;  // Dostosowanie do przesunięcia
+            previewY = me.getY() - offsetY;
             repaint();
         }
-
     }
 
     @Override
@@ -160,9 +192,12 @@ class IBClientModel extends Canvas implements MouseMotionListener, MouseListener
 
     @Override
     public void mousePressed(MouseEvent me) {
-
-        startX = me.getX();
-        startY = me.getY();
+        if (me.isControlDown()) {  // Klawisz Control do przesuwania
+            startPan(me.getPoint());
+            return;
+        }
+        startX = me.getX() - offsetX;  // Dostosowanie do przesunięcia
+        startY = me.getY() - offsetY;
         drawingActive = true;
 
         if (freeDrawing) {
@@ -174,11 +209,15 @@ class IBClientModel extends Canvas implements MouseMotionListener, MouseListener
 
     @Override
     public void mouseReleased(MouseEvent me) {
+        if (isPanning) {  // Zakończenie przesuwania, jeśli było aktywne
+            stopPan();
+            return;
+        }
 
         if (!drawingActive) return;
 
-        int endX = me.getX();
-        int endY = me.getY();
+        int endX = me.getX() - offsetX;  // Dostosowanie do przesunięcia
+        int endY = me.getY() - offsetY;
 
         if (drawingShape != null) {
             switch (drawingShape) {
@@ -196,6 +235,7 @@ class IBClientModel extends Canvas implements MouseMotionListener, MouseListener
         controller.mouseReleased(endX, endY, drawingShape);
         drawingActive = false;
     }
+
     private void drawRectangle(Color c, int x1, int y1, int x2, int y2) {
         int x = Math.min(x1, x2);
         int y = Math.min(y1, y2);
@@ -211,17 +251,39 @@ class IBClientModel extends Canvas implements MouseMotionListener, MouseListener
         int x = Math.min(x1, x2);
         int y = Math.min(y1, y2);
         int diameter = Math.max(Math.abs(x1 - x2), Math.abs(y1 - y2));
-
         offGraphics.setColor(c);
         offGraphics.drawOval(x, y, diameter, diameter);
         repaint();
+    }
 
+    private void startPan(Point startPoint) {
+        isPanning = true;
+        lastPanPoint = startPoint;
+    }
+
+    private void updatePan(Point currentPoint) {
+        if (isPanning && lastPanPoint != null) {
+            int deltaX = currentPoint.x - lastPanPoint.x;
+            int deltaY = currentPoint.y - lastPanPoint.y;
+
+            offsetX += deltaX;
+            offsetY += deltaY;
+
+            lastPanPoint = currentPoint;
+            repaint();
+        }
+    }
+
+    private void stopPan() {
+        isPanning = false;
+        lastPanPoint = null;
     }
 
     @Override
     public void update(Graphics g) {
         paint(g);
     }
+
     public void setFreeDrawing(boolean freeDrawing) {
         this.freeDrawing = freeDrawing;
         this.drawingShape = null;
@@ -230,36 +292,49 @@ class IBClientModel extends Canvas implements MouseMotionListener, MouseListener
 
     @Override
     public void paint(Graphics g) {
+        Graphics2D g2d = (Graphics2D) g;
+
+        // Zapisz oryginalną transformację
+        AffineTransform originalTransform = g2d.getTransform();
+
+        // Zastosuj przesunięcie
+        g2d.translate(offsetX, offsetY);
+
         if (offImage != null) {
-            g.drawImage(offImage, 0, 0, this);
+            g2d.drawImage(offImage, 0, 0, this);
         }
+
         if (isPreviewActive) {
-            g.setColor(color);
+            g2d.setColor(color);
             switch (currentShape) {
                 case "line":
-                    g.drawLine(startX, startY, previewX, previewY);
+                    g2d.drawLine(startX, startY, previewX, previewY);
                     break;
                 case "rectangle":
                     int x = Math.min(startX, previewX);
                     int y = Math.min(startY, previewY);
                     int width = Math.abs(previewX - startX);
                     int height = Math.abs(previewY - startY);
-                    g.drawRect(x, y, width, height);
+                    g2d.drawRect(x, y, width, height);
                     break;
                 case "circle":
                     x = Math.min(startX, previewX);
                     y = Math.min(startY, previewY);
                     int diameter = Math.max(Math.abs(previewX - startX), Math.abs(previewY - startY));
-                    g.drawOval(x, y, diameter, diameter);
+                    g2d.drawOval(x, y, diameter, diameter);
                     break;
             }
         }
+
+        // Przywróć oryginalną transformację
+        g2d.setTransform(originalTransform);
     }
 
     @Override
     public String toString() {
         return "client, currentMouseX=" + mouseCurrentX + ", mouseCurrentY=" + mouseCurrentY;
     }
+
     public void saveDrawing(String filePath) {
         int width = getBounds().width;
         int height = getBounds().height;
@@ -278,8 +353,8 @@ class IBClientModel extends Canvas implements MouseMotionListener, MouseListener
     }
 
     public boolean isEraserActive() {
-    {
+        {
 
-    }
+        }
         return false;
     }}
