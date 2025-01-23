@@ -9,9 +9,4 @@ To jest prosty projekt API zbudowany w ramach ćwiczeń z programowania zespoło
 - Aktualizacja istniejących ogłoszeń (`PUT /announcements/<id>`)
 - Usuwanie ogłoszeń (`DELETE /announcements/<id>`)
 
-## Wymagania
-Aby uruchomić projekt, potrzebujesz:
-- Python 3.9 lub nowszy
-- Zainstalowanych zależności wymienionych w `requirements.txt`
-
 
