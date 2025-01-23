@@ -8,5 +8,5 @@ app.config['JSON_AS_ASCII'] = False
 
 db = SQLAlchemy(app)
 
-from . import routes  # Import routes.py
+from . import routes  
 
