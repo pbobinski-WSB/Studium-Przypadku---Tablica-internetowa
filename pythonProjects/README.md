@@ -14,10 +14,4 @@ Aby uruchomić projekt, potrzebujesz:
 - Python 3.9 lub nowszy
 - Zainstalowanych zależności wymienionych w `requirements.txt`
 
-## Instalacja i uruchomienie
-
-1. **Sklonuj repozytorium (lub użyj forka):**
-   ```bash
-   git clone <link_do_repo>
-   cd <folder_projektu>
 
