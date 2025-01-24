@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interaktywna Tablica</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f4f4f4;
+    }
+    h1 {
+      text-align: center;
+    }
+    .board {
+      width: 100%;
+      max-width: 600px;
+      margin: 20px auto;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      background: #fff;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .post {
+      margin: 10px 0;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background: #fafafa;
+    }
+    .post:hover {
+      background: #f0f8ff;
+    }
+    .post p {
+      margin: 0;
+    }
+    .new-post {
+      display: flex;
+      margin-top: 20px;
+    }
+    .new-post input {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .new-post button {
+      margin-left: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      background-color: #007BFF;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .new-post button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Interaktywna Tablica</h1>
+  <div class="board">
+    <!-- Miejsce na posty -->
+    <div id="posts"></div>
+
+    <!-- Formularz dodawania nowego posta -->
+    <div class="new-post">
+      <input type="text" id="postContent" placeholder="Napisz coś...">
+      <button onclick="addPost()">Dodaj</button>
+    </div>
+  </div>
+
+  <script>
+    // Funkcja dodająca post do tablicy
+    function addPost() {
+      const postContent = document.getElementById('postContent').value;
+      const postsContainer = document.getElementById('posts');
+
+      if (postContent.trim() === "") {
+        alert("Treść posta nie może być pusta!");
+        return;
+      }
+
+      // Tworzenie nowego elementu HTML dla posta
+      const postElement = document.createElement('div');
+      postElement.className = 'post';
+      postElement.innerHTML = `<p>${postContent}</p>`;
+
+      // Dodanie posta do tablicy
+      postsContainer.appendChild(postElement);
+
+      // Wyczyść pole tekstowe
+      document.getElementById('postContent').value = "";
+    }
+  </script>
+</body>
+</html>
