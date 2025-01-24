@@ -1,7 +1,5 @@
 package wsb.sp_pwgp.tablica;
 
-package wsb.sp_pwgp.tablica;
-
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
