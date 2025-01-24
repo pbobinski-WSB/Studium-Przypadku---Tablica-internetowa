@@ -44,9 +44,9 @@ public class IBClientView extends Frame {
         saveButton.addActionListener((evt) -> saveDrawing());
         Panel p150 = new Panel();
         p150.add(saveButton);
-      
-      
-       // Przycisk "eraser"
+
+
+        // Przycisk "eraser"
         Button b = new Button("eraser");
         b.addActionListener((evt) -> model.toggleEraser());  // Przełączanie gumki
         Panel ep150 = new Panel();
@@ -60,7 +60,7 @@ public class IBClientView extends Frame {
 
         Button colorButton = new Button("Choose Color");
         colorButton.addActionListener((event) -> {
-            
+
             Color selectedColor = JColorChooser.showDialog(this, "Choose a Color", model.getColor());
             if (selectedColor != null) {
                 model.setColor(selectedColor);
@@ -71,7 +71,8 @@ public class IBClientView extends Frame {
 
         Choice drawingModePicker;
         drawingModePicker = new Choice();
-        String[] drawingModes = {"Free Draw", "Draw Line", "Draw Rectangle", "Draw Circle", "Spray"};
+        String[] drawingModes = {"Free Draw", "Draw Line", "Draw Dashed Line", "Draw Rectangle", "Draw Circle", "Spray"};
+
         for (String mode : drawingModes) {
             drawingModePicker.add(mode);
         }
@@ -85,6 +86,12 @@ public class IBClientView extends Frame {
                 case "Draw Line":
                     model.setFreeDrawing(false);
                     model.setDrawingShape("line");
+                    model.setDrawingStyle("solid");
+                    break;
+                case "Draw Dashed Line":
+                    model.setFreeDrawing(false);
+                    model.setDrawingShape("line");
+                    model.setDrawingStyle("dashed");
                     break;
                 case "Draw Rectangle":
                     model.setFreeDrawing(false);
@@ -150,13 +157,13 @@ public class IBClientView extends Frame {
     private void openColorChooser() {
         Color selectedColor = JColorChooser.showDialog(this, "Choose a Color", model.getColor());
         if (selectedColor != null) {
-            model.setColor(selectedColor); 
+            model.setColor(selectedColor);
         }
     }
     private void saveDrawing() {
-       
+
         FileDialog fileDialog = new FileDialog(this, "Save Drawing", FileDialog.SAVE);
-        fileDialog.setFile("drawing.png"); 
+        fileDialog.setFile("drawing.png");
         fileDialog.setVisible(true);
 
         String directory = fileDialog.getDirectory();
@@ -165,10 +172,10 @@ public class IBClientView extends Frame {
         if (directory != null && file != null) {
             String filePath = directory + file;
             try {
-                model.saveDrawing(filePath); 
+                model.saveDrawing(filePath);
                 JOptionPane.showMessageDialog(this, "Drawing saved successfully to:\n" + filePath,
                         "Success", JOptionPane.INFORMATION_MESSAGE);
-            } catch (Exception e) { 
+            } catch (Exception e) {
                 JOptionPane.showMessageDialog(this, "Error saving drawing:\n" + e.getMessage(),
                         "Error", JOptionPane.ERROR_MESSAGE);
             }
@@ -192,7 +199,7 @@ public class IBClientView extends Frame {
         super.dispose();
     }
 
-   
+
     public IBClientModel getModel() {
         return model;
     }

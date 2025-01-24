@@ -27,6 +27,7 @@ class IBClientModel extends Canvas implements MouseMotionListener, MouseListener
     private int penThickness = 1;
     private boolean isDrawingShape = false;
     private String currentShape = "line";
+    private String drawingStyle = "solid"; // Domyślnie solid
     private int startX, startY;
     private int previewX, previewY;
     private boolean freeDrawing = false;
@@ -90,6 +91,12 @@ class IBClientModel extends Canvas implements MouseMotionListener, MouseListener
         }
         drawingActive = false;
     }
+
+    //metoda do wyboru stylu
+    public void setDrawingStyle(String style) {
+        this.drawingStyle = style;
+    }
+
     public Color getColor() {
         return this.color;
     }
@@ -130,24 +137,26 @@ class IBClientModel extends Canvas implements MouseMotionListener, MouseListener
 
     synchronized void drawLine(Color c, int x1, int y1, int x2, int y2) {
         EventQueue.invokeLater(() -> {
-            if (isEraserActive) {
-                offGraphics.setColor(getBackground());  
-            } else {
-                offGraphics.setColor(c);  
-            }
             Graphics2D g2d = (Graphics2D) offGraphics;
-            g2d.setStroke(new BasicStroke(penThickness));
+            g2d.setColor(isEraserActive ? getBackground() : c);
+            if ("dashed".equals(drawingStyle)) {
+                float[] dashPattern = {10, 10}; // Długość kreski i odstępu
+                g2d.setStroke(new BasicStroke(penThickness, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10, dashPattern, 0));
+            } else {
+                g2d.setStroke(new BasicStroke(penThickness)); // Styl domyślny
+            }
             g2d.drawLine(x1, y1, x2, y2);
             repaint();
         });
     }
 
+
     synchronized void drawObject(Color c, int startX, int startY, int endX, int endY, String drawingShape) {
         EventQueue.invokeLater(() -> {
             if (isEraserActive) {
-                offGraphics.setColor(getBackground());  
+                offGraphics.setColor(getBackground());
             } else {
-                offGraphics.setColor(c);  
+                offGraphics.setColor(c);
             }
             switch (drawingShape) {
                 case "line":
@@ -185,12 +194,12 @@ class IBClientModel extends Canvas implements MouseMotionListener, MouseListener
         if (freeDrawing) {
             int tempX = mouseCurrentX;
             int tempY = mouseCurrentY;
-            mouseCurrentX = me.getX() - offsetX;  
+            mouseCurrentX = me.getX() - offsetX;
             mouseCurrentY = me.getY() - offsetY;
             drawLine(color, tempX, tempY, mouseCurrentX, mouseCurrentY);
             controller.mouseDragged(mouseCurrentX, mouseCurrentY);
         } else if (isPreviewActive) {
-            previewX = me.getX() - offsetX;  
+            previewX = me.getX() - offsetX;
             previewY = me.getY() - offsetY;
             repaint();
         }
@@ -210,11 +219,11 @@ class IBClientModel extends Canvas implements MouseMotionListener, MouseListener
 
     @Override
     public void mousePressed(MouseEvent me) {
-        if (me.isControlDown()) {  
+        if (me.isControlDown()) {
             startPan(me.getPoint());
             return;
         }
-        startX = me.getX() - offsetX;  
+        startX = me.getX() - offsetX;
         startY = me.getY() - offsetY;
         drawingActive = true;
 
@@ -227,14 +236,14 @@ class IBClientModel extends Canvas implements MouseMotionListener, MouseListener
 
     @Override
     public void mouseReleased(MouseEvent me) {
-        if (isPanning) {  
+        if (isPanning) {
             stopPan();
             return;
         }
 
         if (!drawingActive) return;
 
-        int endX = me.getX() - offsetX;  
+        int endX = me.getX() - offsetX;
         int endY = me.getY() - offsetY;
 
         if (drawingShape != null) {
@@ -249,7 +258,7 @@ class IBClientModel extends Canvas implements MouseMotionListener, MouseListener
                     drawCircle(color, startX, startY, endX, endY);
                     break;
                 case "spray":
-                    
+
             }
         }
         controller.mouseReleased(endX, endY, drawingShape);
@@ -314,10 +323,10 @@ class IBClientModel extends Canvas implements MouseMotionListener, MouseListener
     public void paint(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
 
-        
+
         AffineTransform originalTransform = g2d.getTransform();
 
-       
+
         g2d.translate(offsetX, offsetY);
 
         if (offImage != null) {
@@ -346,7 +355,7 @@ class IBClientModel extends Canvas implements MouseMotionListener, MouseListener
             }
         }
 
-      
+
         g2d.setTransform(originalTransform);
     }
 
@@ -381,12 +390,12 @@ class IBClientModel extends Canvas implements MouseMotionListener, MouseListener
     private void drawDot(Color c, int x, int y) {
         EventQueue.invokeLater(() -> {
             if (isEraserActive) {
-                offGraphics.setColor(getBackground()); 
+                offGraphics.setColor(getBackground());
             } else {
-                offGraphics.setColor(c);  
+                offGraphics.setColor(c);
             }
-            offGraphics.fillRect(x, y, 1, 1);  
+            offGraphics.fillRect(x, y, 1, 1);
             repaint();
         });
     }
-    }
+}
