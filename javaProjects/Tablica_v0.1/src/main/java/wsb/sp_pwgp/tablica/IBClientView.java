@@ -1,5 +1,7 @@
 package wsb.sp_pwgp.tablica;
 
+package wsb.sp_pwgp.tablica;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
@@ -71,7 +73,8 @@ public class IBClientView extends Frame {
 
         Choice drawingModePicker;
         drawingModePicker = new Choice();
-        String[] drawingModes = {"Free Draw", "Draw Line", "Draw Dashed Line", "Draw Rectangle", "Draw Circle", "Spray"};
+        String[] drawingModes = {"Free Draw", "Draw Line", "Draw Dashed Line", "Draw Rectangle", "Draw Circle", "Spray", "Heart Sticker"};
+
 
         for (String mode : drawingModes) {
             drawingModePicker.add(mode);
@@ -104,6 +107,9 @@ public class IBClientView extends Frame {
                 case "Spray":
                     model.setFreeDrawing(false);
                     model.setDrawingShape("spray");
+                    break;
+                case "Heart Sticker":
+                    model.setDrawingShape("heart");
                     break;
             }
         });

@@ -116,6 +116,25 @@ class IBClientModel extends Canvas implements MouseMotionListener, MouseListener
         clear();
     }
 
+    //naklejki w kształcie serduszek
+    synchronized void drawHeart(Color c, int centerX, int centerY, int size) {
+        EventQueue.invokeLater(() -> {
+            Graphics2D g2d = (Graphics2D) offGraphics;
+            g2d.setColor(c);
+            int halfSize = size / 2;
+
+            Polygon heart = new Polygon();
+            for (int t = 0; t <= 360; t++) {
+                double angle = Math.toRadians(t);
+                double x = 16 * Math.pow(Math.sin(angle), 3);
+                double y = -(13 * Math.cos(angle) - 5 * Math.cos(2 * angle) - 2 * Math.cos(3 * angle) - Math.cos(4 * angle));
+                heart.addPoint(centerX + (int) (x * halfSize / 16), centerY + (int) (y * halfSize / 16));
+            }
+            g2d.fillPolygon(heart);
+            repaint();
+        });
+    }
+
     void clear() {
         int width = getBounds().width, height = getBounds().height;
         offGraphics.clearRect(0, 0, width, height);
@@ -230,6 +249,10 @@ class IBClientModel extends Canvas implements MouseMotionListener, MouseListener
         if (freeDrawing) {
             mouseCurrentX = startX;
             mouseCurrentY = startY;
+        }
+        if ("heart".equals(drawingShape)) {
+            drawHeart(color, startX, startY, 50); // Example size for heart sticker
+            drawingActive = false; // Only one click to place the heart
         }
         controller.mousePressed(startX, startY);
     }
@@ -399,3 +422,4 @@ class IBClientModel extends Canvas implements MouseMotionListener, MouseListener
         });
     }
 }
+
