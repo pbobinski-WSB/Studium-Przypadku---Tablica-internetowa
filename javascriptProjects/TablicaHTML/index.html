@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktywna Tablica</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        canvas {
+            border: 1px solid black;
+            cursor: crosshair;
+        }
+        .toolbar {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        .toolbar > * {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="toolbar">
+        <select id="tool">
+            <option value="brush">Pędzel</option>
+            <option value="spray">Spray</option>
+            <option value="eraser">Gumka</option>
+            <option value="line">Linia</option>
+            <option value="rectangle">Prostokąt</option>
+            <option value="circle">Okrąg</option>
+            <option value="text">Tekst</option>
+        </select>
+        <input type="color" id="color" value="#000000">
+        <input type="number" id="size" value="5" min="1" max="50">
+        <button id="clear">Wyczyść</button>
+    </div>
+    <canvas id="canvas" width="800" height="600"></canvas>
+    <script src="client.js"></script>
+</body>
+</html>
