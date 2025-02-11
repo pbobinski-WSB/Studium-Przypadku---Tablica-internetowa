@@ -1,6 +1,15 @@
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
+// Create preview canvas
+const previewCanvas = document.createElement('canvas');
+previewCanvas.width = canvas.width;
+previewCanvas.height = canvas.height;
+previewCanvas.style.position = 'absolute';
+previewCanvas.style.pointerEvents = 'none';
+canvas.parentElement.appendChild(previewCanvas);
+const previewCtx = previewCanvas.getContext('2d');
+
 const toolSelector = document.getElementById('tool');
 const colorPicker = document.getElementById('color');
 const sizeInput = document.getElementById('size');
@@ -10,8 +19,32 @@ let tool = 'brush';
 let userColor = colorPicker.value;
 let brushSize = parseInt(sizeInput.value, 10);
 let drawing = false;
-
+let lastX = 0;
+let lastY = 0;
 let startX, startY;
+
+// Function to update cursor preview
+function updatePreview(x, y) {
+    previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+    
+    if (tool === 'brush' || tool === 'spray' || tool === 'eraser') {
+        previewCtx.beginPath();
+        previewCtx.arc(x, y, brushSize / 2, 0, Math.PI * 2);
+        previewCtx.strokeStyle = tool === 'eraser' ? '#000' : userColor;
+        previewCtx.stroke();
+    }
+}
+
+// Update preview canvas position
+function updatePreviewPosition() {
+    const rect = canvas.getBoundingClientRect();
+    previewCanvas.style.left = rect.left + 'px';
+    previewCanvas.style.top = rect.top + 'px';
+}
+
+// Initial position update
+updatePreviewPosition();
+window.addEventListener('resize', updatePreviewPosition);
 
 // Zmiana narzędzi, koloru i rozmiaru
 toolSelector.addEventListener('change', (e) => tool = e.target.value);
@@ -50,9 +83,14 @@ canvas.addEventListener('mousedown', (e) => {
 });
 
 canvas.addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    lastX = e.clientX - rect.left;
+    lastY = e.clientY - rect.top;
+    
+    updatePreview(lastX, lastY);
+    
     if (!drawing || tool === 'text') return;
 
-    const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
