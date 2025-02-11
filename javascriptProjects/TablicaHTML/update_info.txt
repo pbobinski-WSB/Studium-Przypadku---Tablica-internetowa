@@ -1,0 +1,8 @@
+AKTUALIZACJA TABLICY - 11.02.2025
+
+Co nowego:
+- Dodano podgląd narzędzi podczas rysowania
+- Odświeżony interfejs z ikonami emoji
+- Lepsze wsparcie dla urządzeń mobilnych
+
+Teraz możesz zobaczyć dokładny kształt i rozmiar przed narysowaniem!

@@ -7,6 +7,10 @@ previewCanvas.width = canvas.width;
 previewCanvas.height = canvas.height;
 previewCanvas.style.position = 'absolute';
 previewCanvas.style.pointerEvents = 'none';
+previewCanvas.style.left = '0';
+previewCanvas.style.top = '0';
+previewCanvas.style.zIndex = '1';
+previewCanvas.style.borderRadius = '10px';
 canvas.parentElement.appendChild(previewCanvas);
 const previewCtx = previewCanvas.getContext('2d');
 
@@ -27,24 +31,31 @@ let startX, startY;
 function updatePreview(x, y) {
     previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
     
+    previewCtx.strokeStyle = tool === 'eraser' ? '#000' : userColor;
+    previewCtx.lineWidth = 1;
+    
     if (tool === 'brush' || tool === 'spray' || tool === 'eraser') {
         previewCtx.beginPath();
         previewCtx.arc(x, y, brushSize / 2, 0, Math.PI * 2);
-        previewCtx.strokeStyle = tool === 'eraser' ? '#000' : userColor;
+        previewCtx.stroke();
+    } else if (tool === 'line' && drawing) {
+        previewCtx.beginPath();
+        previewCtx.moveTo(startX, startY);
+        previewCtx.lineTo(x, y);
+        previewCtx.stroke();
+    } else if (tool === 'rectangle' && drawing) {
+        previewCtx.strokeRect(startX, startY, x - startX, y - startY);
+    } else if (tool === 'circle' && drawing) {
+        const radius = Math.sqrt((x - startX) ** 2 + (y - startY) ** 2);
+        previewCtx.beginPath();
+        previewCtx.arc(startX, startY, radius, 0, Math.PI * 2);
         previewCtx.stroke();
     }
 }
 
-// Update preview canvas position
-function updatePreviewPosition() {
-    const rect = canvas.getBoundingClientRect();
-    previewCanvas.style.left = rect.left + 'px';
-    previewCanvas.style.top = rect.top + 'px';
-}
-
-// Initial position update
-updatePreviewPosition();
-window.addEventListener('resize', updatePreviewPosition);
+// Set canvas container size
+canvas.parentElement.style.width = canvas.width + 'px';
+canvas.parentElement.style.height = canvas.height + 'px';
 
 // Zmiana narzędzi, koloru i rozmiaru
 toolSelector.addEventListener('change', (e) => tool = e.target.value);
@@ -84,15 +95,12 @@ canvas.addEventListener('mousedown', (e) => {
 
 canvas.addEventListener('mousemove', (e) => {
     const rect = canvas.getBoundingClientRect();
-    lastX = e.clientX - rect.left;
-    lastY = e.clientY - rect.top;
-    
-    updatePreview(lastX, lastY);
-    
-    if (!drawing || tool === 'text') return;
-
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
+    
+    updatePreview(x, y);
+    
+    if (!drawing || tool === 'text') return;
 
     if (tool === 'brush') {
         ctx.fillStyle = userColor;
