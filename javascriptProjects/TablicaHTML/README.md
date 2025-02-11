@@ -1,33 +1,36 @@
-# Interaktywna Tablica
+# Interaktywna Tablica Online
 
-Aplikacja do rysowania w czasie rzeczywistym stworzona przy użyciu HTML5 Canvas i JavaScript.
+## Opis
+Interaktywna tablica to aplikacja webowa umożliwiająca rysowanie i współdzielenie rysunków w czasie rzeczywistym. Projekt został stworzony z wykorzystaniem HTML5 Canvas i WebSocket do komunikacji w czasie rzeczywistym.
 
 ## Funkcje
-- Narzędzia do rysowania:
-  - Pędzel
-  - Spray
-  - Gumka
-  - Linia
-  - Prostokąt
-  - Koło
-  - Tekst
-- Wybór koloru
-- Regulacja rozmiaru pędzla
-- Czyszczenie tablicy
-- Rysowanie w czasie rzeczywistym
+- 🎨 Różnorodne narzędzia do rysowania:
+  - Pędzel - do odręcznego rysowania
+  - Spray - do tworzenia efektu rozpylania
+  - Gumka - do wymazywania elementów
+  - Linia - do rysowania prostych linii
+  - Prostokąt - do tworzenia prostokątów
+  - Okrąg - do rysowania okręgów
+  - Tekst - do dodawania napisów
+- 🎯 Intuicyjny interfejs użytkownika
+- 🎭 Wybór koloru z palety kolorów
+- 📏 Regulacja rozmiaru narzędzi
+- 🗑️ Możliwość czyszczenia całej tablicy
 
-## Jak używać
-1. Otwórz `index.html` w przeglądarce
-2. Wybierz narzędzie z menu
-3. Wybierz kolor
-4. Ustaw rozmiar narzędzia
-5. Zacznij rysować!
+## Jak uruchomić
+1. Upewnij się, że masz zainstalowany Node.js
+2. Sklonuj repozytorium
+3. W terminalu przejdź do katalogu projektu
+4. Zainstaluj zależności komendą: `npm install`
+5. Uruchom serwer: `node server.js`
+6. Otwórz przeglądarkę i przejdź pod adres: `http://localhost:3000`
 
-## Opis narzędzi
-- **Pędzel**: Swobodne rysowanie
-- **Spray**: Efekt farby w sprayu
-- **Gumka**: Wymazywanie
-- **Linia**: Rysowanie prostych linii
-- **Prostokąt**: Tworzenie prostokątów
-- **Koło**: Rysowanie okręgów
-- **Tekst**: Dodawanie tekstu
+## Technologie
+- HTML5 Canvas
+- JavaScript
+- WebSocket
+- Node.js
+- Express.js
+
+## Współpraca
+Aplikacja umożliwia współpracę wielu użytkowników w czasie rzeczywistym. Wszyscy połączeni użytkownicy widzą zmiany wprowadzane na tablicy przez innych uczestników.
