@@ -13,7 +13,7 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         canvas {
@@ -26,10 +26,11 @@
         .toolbar {
             display: flex;
             margin-bottom: 20px;
-            background: white;
+            background: rgba(255, 255, 255, 0.95);
             padding: 20px;
             border-radius: 12px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
             gap: 20px;
             align-items: center;
         }
@@ -85,10 +86,42 @@
             display: flex;
             align-items: center;
             gap: 6px;
+            transition: all 0.3s ease;
         }
         #clear:hover {
             background: #357abd;
             transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        #clear:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+        .status {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #2ecc71;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
         }
         .title {
             font-size: 28px;
@@ -132,6 +165,10 @@
         <button id="clear"><i class="fas fa-trash-alt"></i> Wyczyść</button>
     </div>
     <canvas id="canvas" width="800" height="600"></canvas>
+    <div class="status">
+        <div class="status-dot"></div>
+        <span>Połączono z serwerem</span>
+    </div>
     <script src="client.js"></script>
 </body>
 </html>
