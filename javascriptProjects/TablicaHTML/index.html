@@ -4,65 +4,170 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interaktywna Tablica</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
-        body {
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 2.2em;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .toolbar {
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+            gap: 10px;
+            width: 800px;
+        }
+
+        .tool-btn {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
-            background: linear-gradient(to bottom right, #f5f7fa, #c3cfe2);
-            font-family: Arial, sans-serif;
+            background: none;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #2c3e50;
         }
-        h1 {
-            color: #333;
-            margin-bottom: 15px;
+
+        .tool-btn:hover {
+            background: #f8f9fa;
+            border-color: #e9ecef;
         }
-        canvas {
-            border: 2px solid #666;
-            border-radius: 5px;
-            cursor: crosshair;
+
+        .tool-btn.active {
+            background: #e9ecef;
+            border-color: #4a90e2;
+            color: #4a90e2;
+        }
+
+        .tool-btn .material-icons {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .tool-btn span {
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .color-picker {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .color-picker::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        .color-picker::-webkit-color-swatch {
+            border: none;
+            border-radius: 8px;
+        }
+
+        #canvas {
             background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-        .toolbar {
+
+        .settings-group {
             display: flex;
-            margin-bottom: 15px;
-            background: white;
-            padding: 10px;
-            border-radius: 5px;
-        }
-        .toolbar > * {
-            margin-right: 10px;
+            align-items: center;
+            gap: 10px;
             padding: 5px;
+            background: #f8f9fa;
+            border-radius: 8px;
         }
-        button {
+
+        #size {
+            width: 60px;
+            padding: 5px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+        }
+
+        .btn {
             background: #4a90e2;
             color: white;
             border: none;
-            padding: 5px 10px;
+            padding: 8px 16px;
+            border-radius: 8px;
             cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #357abd;
         }
     </style>
 </head>
 <body>
     <h1>Interaktywna Tablica do Rysowania</h1>
     <div class="toolbar">
-        <select id="tool">
-            <option value="brush">Pędzel</option>
-            <option value="spray">Spray</option>
-            <option value="eraser">Gumka</option>
-            <option value="line">Linia</option>
-            <option value="rectangle">Prostokąt</option>
-            <option value="circle">Okrąg</option>
-            <option value="text">Tekst</option>
-            <option value="protractor">Kątomierz</option>
-        </select>
-        <input type="color" id="color" value="#000000">
-        <input type="number" id="size" value="5" min="1" max="50">
-        <input type="color" id="fillColor" value="#ffffff">
-        <button id="fillMode">Wypełnienie: Wył.</button>
-        <button id="clear">Wyczyść</button>
+        <button class="tool-btn active" data-tool="brush">
+            <span class="material-icons">brush</span>
+            <span>Pędzel</span>
+        </button>
+        <button class="tool-btn" data-tool="line">
+            <span class="material-icons">show_chart</span>
+            <span>Linia</span>
+        </button>
+        <button class="tool-btn" data-tool="rectangle">
+            <span class="material-icons">crop_square</span>
+            <span>Kwadrat</span>
+        </button>
+        <button class="tool-btn" data-tool="triangle">
+            <span class="material-icons">change_history</span>
+            <span>Trójkąt</span>
+        </button>
+        <button class="tool-btn" data-tool="circle">
+            <span class="material-icons">radio_button_unchecked</span>
+            <span>Koło</span>
+        </button>
+        <button class="tool-btn" data-tool="eraser">
+            <span class="material-icons">auto_fix_normal</span>
+            <span>Gumka</span>
+        </button>
+        <div class="settings-group">
+            <input type="color" id="color" class="color-picker" value="#000000" title="Kolor rysowania">
+            <input type="color" id="fillColor" class="color-picker" value="#ffffff" title="Kolor wypełnienia">
+            <input type="color" id="bgColor" class="color-picker" value="#ffffff" title="Kolor tła">
+        </div>
+        <div class="settings-group">
+            <input type="number" id="size" value="5" min="1" max="50" title="Grubość linii">
+            <button id="fillMode" class="btn">Wypełnienie: Wył.</button>
+            <button id="clear" class="btn">Wyczyść</button>
+        </div>
     </div>
     <canvas id="canvas" width="800" height="600"></canvas>
     <script src="client.js"></script>
