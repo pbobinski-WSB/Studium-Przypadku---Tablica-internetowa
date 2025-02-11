@@ -12,21 +12,41 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
+            background: linear-gradient(to bottom right, #f5f7fa, #c3cfe2);
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 15px;
         }
         canvas {
-            border: 1px solid black;
+            border: 2px solid #666;
+            border-radius: 5px;
             cursor: crosshair;
+            background: white;
         }
         .toolbar {
             display: flex;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
         }
         .toolbar > * {
             margin-right: 10px;
+            padding: 5px;
+        }
+        button {
+            background: #4a90e2;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
+    <h1>Interaktywna Tablica do Rysowania</h1>
     <div class="toolbar">
         <select id="tool">
             <option value="brush">Pędzel</option>
