@@ -12,3 +12,5 @@
 10. Oskar Serafińczuk (gihub Sackenn)
 11. Jan Jesień (github hardkoreJanusz)
 12. Barbara Wnuk (github Barbara159805)
+
+14. Marceli Jaremko (github 0xLecrim)
