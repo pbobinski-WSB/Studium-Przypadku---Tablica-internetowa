@@ -12,21 +12,66 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         canvas {
-            border: 1px solid black;
+            border: none;
             cursor: crosshair;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+            background: white;
+            border-radius: 8px;
         }
         .toolbar {
             display: flex;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            gap: 12px;
         }
         .toolbar > * {
-            margin-right: 10px;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        select, input[type="number"] {
+            background: #f0f2f5;
+            cursor: pointer;
+        }
+        select:hover, input[type="number"]:hover {
+            background: #e4e6e9;
+        }
+        input[type="color"] {
+            width: 40px;
+            height: 40px;
+            padding: 2px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #clear {
+            background: #4a90e2;
+            color: white;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        #clear:hover {
+            background: #357abd;
+            transform: translateY(-1px);
+        }
+        .title {
+            font-size: 24px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-weight: 600;
         }
     </style>
 </head>
 <body>
+    <div class="title">Interaktywna Tablica</div>
     <div class="toolbar">
         <select id="tool">
             <option value="brush">Pędzel</option>
