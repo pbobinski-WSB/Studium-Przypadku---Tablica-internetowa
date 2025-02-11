@@ -118,6 +118,12 @@
             width: 100%;
         }
 
+        .fill-option {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 15px;
@@ -144,11 +150,20 @@
             <input type="color" id="color" value="#000000" title="Wybierz kolor">
             <input type="number" id="size" value="5" min="1" max="50" title="Rozmiar narzędzia">
             <button id="clear">🗑️ Wyczyść</button>
+            <button id="undo">↩️ Cofnij</button>
+            <button id="redo">↪️ Ponów</button>
+            <button id="save">💾 Zapisz</button>
+            <button id="load">📁 Wczytaj</button>
+            <div class="fill-option">
+                <input type="checkbox" id="fill" title="Wypełnij kształt">
+                <label for="fill">🎨 Wypełnienie</label>
+            </div>
         </div>
     </div>
     <div class="canvas-container">
         <canvas id="canvas" width="800" height="600"></canvas>
     </div>
+    <input type="file" id="imageLoader" accept="image/*" style="display: none">
     <script src="client.js"></script>
 </body>
 </html>
