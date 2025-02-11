@@ -1,217 +1,224 @@
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
+let isDrawing = false;
+let lastX = 0;
+let lastY = 0;
+let selectedTool = 'brush';
+let selectedColor = '#000000';
+let fillColor = '#ffffff';
+let lineWidth = 5;
+let isFillMode = false;
+let startAngle = 0;
+let startX = 0;
+let startY = 0;
 
-const toolSelector = document.getElementById('tool');
-const colorPicker = document.getElementById('color');
-const sizeInput = document.getElementById('size');
-const clearButton = document.getElementById('clear');
-
-let tool = 'brush';
-let userColor = colorPicker.value;
-let brushSize = parseInt(sizeInput.value, 10);
-let drawing = false;
-
-let startX, startY;
-
-// Zmiana narzędzi, koloru i rozmiaru
-toolSelector.addEventListener('change', (e) => tool = e.target.value);
-colorPicker.addEventListener('change', (e) => userColor = e.target.value);
-sizeInput.addEventListener('input', (e) => brushSize = parseInt(e.target.value, 10));
-
-// Obsługa WebSocket
-const socket = new WebSocket('ws://localhost:8080');
-
-// Rysowanie na płótnie
-canvas.addEventListener('mousedown', (e) => {
-    const rect = canvas.getBoundingClientRect();
-    startX = e.clientX - rect.left;
-    startY = e.clientY - rect.top;
-    drawing = true;
-
-    if (tool === 'text') {
-        const text = prompt("Wprowadź tekst:");
-        if (text) {
-            ctx.fillStyle = userColor;
-            ctx.font = `${brushSize * 2}px Arial`;
-            ctx.fillText(text, startX, startY);
-
-            socket.send(JSON.stringify({
-                type: 'draw',
-                tool: 'text',
-                x: startX,
-                y: startY,
-                color: userColor,
-                size: brushSize,
-                text
-            }));
-        }
-        drawing = false;
-    }
+// Tool selection
+document.getElementById('tool').addEventListener('change', (e) => {
+    selectedTool = e.target.value;
 });
 
-canvas.addEventListener('mousemove', (e) => {
-    if (!drawing || tool === 'text') return;
-
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    if (tool === 'brush') {
-        ctx.fillStyle = userColor;
-        ctx.beginPath();
-        ctx.arc(x, y, brushSize / 2, 0, Math.PI * 2);
-        ctx.fill();
-
-        socket.send(JSON.stringify({
-            type: 'draw',
-            tool: 'brush',
-            x,
-            y,
-            color: userColor,
-            size: brushSize
-        }));
-    } else if (tool === 'spray') {
-        for (let i = 0; i < 20; i++) {
-            const offsetX = (Math.random() - 0.5) * brushSize;
-            const offsetY = (Math.random() - 0.5) * brushSize;
-            ctx.fillStyle = userColor;
-            ctx.fillRect(x + offsetX, y + offsetY, 1, 1);
-        }
-
-        socket.send(JSON.stringify({
-            type: 'draw',
-            tool: 'spray',
-            x,
-            y,
-            color: userColor,
-            size: brushSize
-        }));
-    } else if (tool === 'eraser') {
-        ctx.fillStyle = '#FFFFFF';
-        ctx.beginPath();
-        ctx.arc(x, y, brushSize / 2, 0, Math.PI * 2);
-        ctx.fill();
-
-        socket.send(JSON.stringify({
-            type: 'draw',
-            tool: 'eraser',
-            x,
-            y,
-            size: brushSize
-        }));
-    }
+// Color selection
+document.getElementById('color').addEventListener('change', (e) => {
+    selectedColor = e.target.value;
 });
 
-canvas.addEventListener('mouseup', (e) => {
-    if (!drawing) return;
-
-    const rect = canvas.getBoundingClientRect();
-    const endX = e.clientX - rect.left;
-    const endY = e.clientY - rect.top;
-
-    if (tool === 'line') {
-        ctx.strokeStyle = userColor;
-        ctx.lineWidth = brushSize;
-        ctx.beginPath();
-        ctx.moveTo(startX, startY);
-        ctx.lineTo(endX, endY);
-        ctx.stroke();
-
-        socket.send(JSON.stringify({
-            type: 'draw',
-            tool: 'line',
-            startX,
-            startY,
-            endX,
-            endY,
-            color: userColor,
-            size: brushSize
-        }));
-    } else if (tool === 'rectangle') {
-        ctx.strokeStyle = userColor;
-        ctx.lineWidth = brushSize;
-        ctx.strokeRect(startX, startY, endX - startX, endY - startY);
-
-        socket.send(JSON.stringify({
-            type: 'draw',
-            tool: 'rectangle',
-            startX,
-            startY,
-            width: endX - startX,
-            height: endY - startY,
-            color: userColor,
-            size: brushSize
-        }));
-    } else if (tool === 'circle') {
-        const radius = Math.sqrt((endX - startX) ** 2 + (endY - startY) ** 2);
-        ctx.strokeStyle = userColor;
-        ctx.lineWidth = brushSize;
-        ctx.beginPath();
-        ctx.arc(startX, startY, radius, 0, Math.PI * 2);
-        ctx.stroke();
-
-        socket.send(JSON.stringify({
-            type: 'draw',
-            tool: 'circle',
-            startX,
-            startY,
-            radius,
-            color: userColor,
-            size: brushSize
-        }));
-    }
-
-    drawing = false;
+// Fill color selection
+document.getElementById('fillColor').addEventListener('change', (e) => {
+    fillColor = e.target.value;
 });
 
-// Wyczyść płótno
-clearButton.addEventListener('click', () => {
+// Line width selection
+document.getElementById('size').addEventListener('change', (e) => {
+    lineWidth = e.target.value;
+});
+
+// Fill mode toggle
+const fillModeBtn = document.getElementById('fillMode');
+fillModeBtn.addEventListener('click', () => {
+    isFillMode = !isFillMode;
+    fillModeBtn.textContent = `Wypełnienie: ${isFillMode ? 'Wł.' : 'Wył.'}`;
+});
+
+// Clear canvas
+document.getElementById('clear').addEventListener('click', () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    socket.send(JSON.stringify({ type: 'clear' }));
 });
 
-// Odbieranie danych od serwera
-socket.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-
-    if (data.type === 'draw') {
-        ctx.fillStyle = data.color || '#FFFFFF';
-        ctx.lineWidth = data.size;
-
-        if (data.tool === 'brush') {
-            ctx.beginPath();
-            ctx.arc(data.x, data.y, data.size / 2, 0, Math.PI * 2);
-            ctx.fill();
-        } else if (data.tool === 'spray') {
-            for (let i = 0; i < 20; i++) {
-                const offsetX = (Math.random() - 0.5) * data.size;
-                const offsetY = (Math.random() - 0.5) * data.size;
-                ctx.fillRect(data.x + offsetX, data.y + offsetY, 1, 1);
-            }
-        } else if (data.tool === 'eraser') {
-            ctx.beginPath();
-            ctx.arc(data.x, data.y, data.size / 2, 0, Math.PI * 2);
-            ctx.fill();
-        } else if (data.tool === 'line') {
-            ctx.strokeStyle = data.color;
-            ctx.beginPath();
-            ctx.moveTo(data.startX, data.startY);
-            ctx.lineTo(data.endX, data.endY);
-            ctx.stroke();
-        } else if (data.tool === 'rectangle') {
-            ctx.strokeStyle = data.color;
-            ctx.strokeRect(data.startX, data.startY, data.width, data.height);
-        } else if (data.tool === 'circle') {
-            ctx.strokeStyle = data.color;
-            ctx.beginPath();
-            ctx.arc(data.startX, data.startY, data.radius, 0, Math.PI * 2);
-            ctx.stroke();
-        } else if (data.tool === 'text') {
-            ctx.fillStyle = data.color;
-            ctx.font = `${data.size * 2}px Arial`;
-            ctx.fillText(data.text, data.x, data.y);
-        }
-    } else if (data.type === 'clear') {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+// Drawing functions
+function startDrawing(e) {
+    isDrawing = true;
+    [lastX, lastY] = [e.offsetX, e.offsetY];
+    [startX, startY] = [e.offsetX, e.offsetY];
+    
+    if (selectedTool === 'protractor') {
+        startAngle = Math.atan2(e.offsetY - startY, e.offsetX - startX);
     }
-};
+}
+
+function draw(e) {
+    if (!isDrawing) return;
+
+    switch (selectedTool) {
+        case 'brush':
+            drawBrush(e);
+            break;
+        case 'spray':
+            drawSpray(e);
+            break;
+        case 'eraser':
+            erase(e);
+            break;
+        case 'line':
+            drawLine(e);
+            break;
+        case 'rectangle':
+            drawRectangle(e);
+            break;
+        case 'circle':
+            drawCircle(e);
+            break;
+        case 'protractor':
+            drawProtractor(e);
+            break;
+    }
+}
+
+function stopDrawing() {
+    if (!isDrawing) return;
+    isDrawing = false;
+
+    // Finalize shapes with fill if fill mode is on
+    if (isFillMode) {
+        ctx.fillStyle = fillColor;
+        if (selectedTool === 'rectangle') {
+            const width = lastX - startX;
+            const height = lastY - startY;
+            ctx.fillRect(startX, startY, width, height);
+        } else if (selectedTool === 'circle') {
+            const radius = Math.sqrt(Math.pow(lastX - startX, 2) + Math.pow(lastY - startY, 2));
+            ctx.beginPath();
+            ctx.arc(startX, startY, radius, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+}
+
+function drawBrush(e) {
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+    ctx.lineTo(e.offsetX, e.offsetY);
+    ctx.strokeStyle = selectedColor;
+    ctx.lineWidth = lineWidth;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+    [lastX, lastY] = [e.offsetX, e.offsetY];
+}
+
+function drawSpray(e) {
+    const density = 50;
+    ctx.fillStyle = selectedColor;
+    for (let i = 0; i < density; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const radius = Math.random() * lineWidth;
+        const x = e.offsetX + radius * Math.cos(angle);
+        const y = e.offsetY + radius * Math.sin(angle);
+        ctx.beginPath();
+        ctx.arc(x, y, 0.5, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+function erase(e) {
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+    ctx.lineTo(e.offsetX, e.offsetY);
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = lineWidth;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+    [lastX, lastY] = [e.offsetX, e.offsetY];
+}
+
+function drawLine(e) {
+    ctx.beginPath();
+    ctx.moveTo(startX, startY);
+    ctx.lineTo(e.offsetX, e.offsetY);
+    ctx.strokeStyle = selectedColor;
+    ctx.lineWidth = lineWidth;
+    ctx.stroke();
+}
+
+function drawRectangle(e) {
+    const width = e.offsetX - startX;
+    const height = e.offsetY - startY;
+    
+    // Clear the canvas and redraw
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    ctx.beginPath();
+    ctx.strokeStyle = selectedColor;
+    ctx.lineWidth = lineWidth;
+    ctx.strokeRect(startX, startY, width, height);
+    
+    if (isFillMode) {
+        ctx.fillStyle = fillColor;
+        ctx.fillRect(startX, startY, width, height);
+    }
+}
+
+function drawCircle(e) {
+    const radius = Math.sqrt(Math.pow(e.offsetX - startX, 2) + Math.pow(e.offsetY - startY, 2));
+    
+    // Clear the canvas and redraw
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    ctx.beginPath();
+    ctx.arc(startX, startY, radius, 0, Math.PI * 2);
+    ctx.strokeStyle = selectedColor;
+    ctx.lineWidth = lineWidth;
+    ctx.stroke();
+    
+    if (isFillMode) {
+        ctx.fillStyle = fillColor;
+        ctx.fill();
+    }
+}
+
+function drawProtractor(e) {
+    const currentAngle = Math.atan2(e.offsetY - startY, e.offsetX - startX);
+    let angleDiff = (currentAngle - startAngle) * (180 / Math.PI);
+    
+    // Ensure angle is positive
+    if (angleDiff < 0) {
+        angleDiff += 360;
+    }
+    
+    // Clear the canvas and redraw
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw the angle lines
+    ctx.beginPath();
+    ctx.moveTo(startX, startY);
+    ctx.lineTo(startX + Math.cos(startAngle) * 100, startY + Math.sin(startAngle) * 100);
+    ctx.moveTo(startX, startY);
+    ctx.lineTo(e.offsetX, e.offsetY);
+    ctx.strokeStyle = selectedColor;
+    ctx.lineWidth = lineWidth;
+    ctx.stroke();
+    
+    // Draw the angle arc
+    ctx.beginPath();
+    ctx.arc(startX, startY, 30, startAngle, currentAngle);
+    ctx.stroke();
+    
+    // Display the angle
+    ctx.fillStyle = selectedColor;
+    ctx.font = '16px Arial';
+    ctx.fillText(`${Math.round(angleDiff)}°`, startX + 40, startY + 40);
+}
+
+// Event listeners
+canvas.addEventListener('mousedown', startDrawing);
+canvas.addEventListener('mousemove', draw);
+canvas.addEventListener('mouseup', stopDrawing);
+canvas.addEventListener('mouseout', stopDrawing);
