@@ -1,0 +1,24 @@
+Nowe funkcje dodane do interaktywnej tablicy:
+
+1. Historia rysowania (Undo/Redo)
+- Dodano przyciski Cofnij (↩️) i Ponów (↪️)
+- Możliwość cofania i ponawiania ostatnich 50 akcji
+- Synchronizacja historii między wszystkimi połączonymi klientami
+
+2. Zapisywanie i wczytywanie
+- Dodano przycisk Zapisz (💾) do eksportu rysunku jako plik PNG
+- Dodano przycisk Wczytaj (📁) do importowania obrazów
+- Synchronizacja wczytanych obrazów między klientami
+
+3. Wypełnianie kształtów
+- Dodano opcję wypełniania (🎨) dla prostokątów i okręgów
+- Podgląd wypełnienia podczas rysowania
+- Możliwość przełączania między konturem a wypełnieniem
+- Synchronizacja stanu wypełnienia między klientami
+
+4. Ulepszenia w komunikacji
+- Rozszerzono protokół WebSocket o nowe typy wiadomości
+- Dodano obsługę synchronizacji historii i wczytywanych obrazów
+- Poprawiono synchronizację stanu między klientami
+
+Wszystkie nowe funkcje są w pełni zintegrowane z systemem współpracy w czasie rzeczywistym.
