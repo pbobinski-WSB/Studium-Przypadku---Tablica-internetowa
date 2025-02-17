@@ -13,3 +13,5 @@
 11. Jan Jesień (github hardkoreJanusz)
 12. Barbara Wnuk (github Barbara159805)
 13. Bartłomiej Winiarek (github winnie1337)
+14. Marceli Jaremko (github 0xLecrim)
+
