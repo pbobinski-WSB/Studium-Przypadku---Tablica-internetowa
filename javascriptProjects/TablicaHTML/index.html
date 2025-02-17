@@ -4,27 +4,142 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interaktywna Tablica</title>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
     <style>
-        body {
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #2c3e50;
+            --accent-color: #e74c3c;
+            --bg-color: #f5f6fa;
+            --toolbar-bg: #ffffff;
+        }
+
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
+
             justify-content: center;
             height: 100vh;
             background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+            padding: 20px;
         }
+
+        .container {
+            background: var(--toolbar-bg);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .toolbar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        select, input, button {
+            padding: 8px 12px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        select {
+            background-color: white;
+            cursor: pointer;
+        }
+
+        select:hover, input:hover {
+            border-color: var(--primary-color);
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            text-transform: uppercase;
+
+        }
+
+        button:hover {
+            background-color: #357abd;
+            transform: translateY(-2px);
+        }
+
+        .canvas-container {
+            position: relative;
+            display: inline-block;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
         canvas {
+
             border: none;
             cursor: crosshair;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
             background: white;
             border-radius: 8px;
+
+            position: absolute;
+            left: 0;
+            top: 0;
+            cursor: crosshair;
+            display: block;
+
         }
-        .toolbar {
+
+        #canvas {
+            z-index: 0;
+        }
+
+        input[type="color"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 40px;
+            cursor: pointer;
+        }
+
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        input[type="color"]::-webkit-color-swatch {
+            border: none;
+            border-radius: 6px;
+        }
+
+        input[type="number"] {
+            width: 100%;
+        }
+
+        .fill-option {
             display: flex;
+
             margin-bottom: 20px;
             background: rgba(255, 255, 255, 0.95);
             padding: 20px;
@@ -136,10 +251,25 @@
             background-repeat: no-repeat;
             background-position: right 8px center;
             background-size: 12px;
+
+            align-items: center;
+            gap: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .toolbar {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
         }
     </style>
 </head>
 <body>
+
     <div class="title">Interaktywna Tablica</div>
     <div class="toolbar">
         <div class="tool-group">
@@ -147,12 +277,20 @@
             <select id="tool">
                 <option value="brush">🖌️ Pędzel</option>
                 <option value="spray">💨 Spray</option>
+
+    <div class="container">
+        <div class="toolbar">
+            <select id="tool">
+                <option value="brush">🖌️ Pędzel</option>
+                <option value="spray">🎨 Spray</option>
+
                 <option value="eraser">🧹 Gumka</option>
                 <option value="line">📏 Linia</option>
                 <option value="rectangle">⬜ Prostokąt</option>
                 <option value="circle">⭕ Okrąg</option>
                 <option value="text">📝 Tekst</option>
             </select>
+
         </div>
         <div class="tool-group">
             <span class="tool-label"><i class="fas fa-palette"></i> Kolor:</span>
@@ -169,6 +307,25 @@
         <div class="status-dot"></div>
         <span>Połączono z serwerem</span>
     </div>
+
+            <input type="color" id="color" value="#000000" title="Wybierz kolor">
+            <input type="number" id="size" value="5" min="1" max="50" title="Rozmiar narzędzia">
+            <button id="clear">🗑️ Wyczyść</button>
+            <button id="undo">↩️ Cofnij</button>
+            <button id="redo">↪️ Ponów</button>
+            <button id="save">💾 Zapisz</button>
+            <button id="load">📁 Wczytaj</button>
+            <div class="fill-option">
+                <input type="checkbox" id="fill" title="Wypełnij kształt">
+                <label for="fill">🎨 Wypełnienie</label>
+            </div>
+        </div>
+    </div>
+    <div class="canvas-container">
+        <canvas id="canvas" width="800" height="600"></canvas>
+    </div>
+    <input type="file" id="imageLoader" accept="image/*" style="display: none">
+
     <script src="client.js"></script>
 </body>
 </html>
